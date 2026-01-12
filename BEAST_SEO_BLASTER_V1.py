@@ -3,130 +3,122 @@ from groq import Groq
 import requests
 from st_copy_to_clipboard import st_copy_to_clipboard
 
-# --- ⚙️ إعدادات الحماية والـ API ---
+# --- ⚙️ الإعدادات الأساسية (Groq Engine) ---
 try:
-    if "GROQ_API_KEY" in st.secrets:
-        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-    else:
-        st.error("⚠️ ملقيتش GROQ_API_KEY فـ Streamlit Secrets!")
-except Exception as e:
-    st.error(f"⚠️ خطأ فـ الإعدادات: {e}")
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+except Exception:
+    st.error("⚠️ خاصك تزيد GROQ_API_KEY فـ Streamlit Secrets!")
 
-# إعداد الصفحة
-st.set_page_config(page_title="Beast Dashboard V3.8", layout="wide")
+# إعداد الصفحة (V4.6 Sniper Edition)
+st.set_page_config(page_title="Beast Sniper V4.6", layout="wide")
 
-# --- 🎨 تصميم الداشبورد ومظهر المقالة (The Beast UI) ---
+# --- 🎨 تصميم الـ UI السريالي (Clean Sniper Style) ---
 st.markdown("""
     <style>
-    /* مظهر الصفحة العام */
-    .stApp { background-color: #0e1117; color: #ffffff; }
-    
-    /* تصميم الـ Tabs */
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
-    .stTabs [data-baseweb="tab"] { background-color: #1a1c24; border-radius: 10px; color: #00ffcc; padding: 10px 20px; font-weight: bold; }
-    .stTabs [aria-selected="true"] { background-color: #00ffcc !important; color: #000 !important; }
-    
-    /* مظهر المقالة الاحترافي (لحل مشكلة "النتيجة العيانة") */
-    .article-output {
+    .stApp { background-color: #0e1117; color: white; }
+    /* مظهر المقالة المختصرة والاحترافية */
+    .article-container {
         background-color: #ffffff;
         color: #1a1a1a;
-        padding: 35px;
-        border-radius: 15px;
+        padding: 40px;
+        border-radius: 12px;
         border-left: 10px solid #00ffcc;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        line-height: 1.8;
+        font-family: 'Inter', sans-serif;
+        line-height: 1.7;
         margin-top: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .article-output h2 { color: #1a1a1a; border-bottom: 2px solid #00ffcc; padding-bottom: 5px; margin-top: 25px; }
-    .article-output h3 { color: #2c3e50; margin-top: 20px; }
-    .article-output a { color: #007bff; font-weight: bold; text-decoration: underline; }
-    
-    /* مظهر برومبت الصورة */
-    .prompt-box { background-color: #1a1c24; border: 1px dashed #ffaa00; padding: 20px; border-radius: 10px; color: #ffd700; font-family: monospace; }
+    .article-container h2 { color: #004a99; font-weight: bold; margin-top: 20px; }
+    .article-container a { color: #3498db; font-weight: bold; text-decoration: underline; }
+    .stTabs [data-baseweb="tab"] { color: #00ffcc; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🦁 Beast Content Machine V3.8")
+st.title("🎯 Beast Sniper V4.6: Quality Mode")
 
-# --- 🕹️ لوحة التحكم الجانبية (Sidebar) ---
-st.sidebar.header("🎯 Target & Link Settings")
-niche = st.sidebar.text_input("Niche / Industry", value="AI Solutions")
-target_url = st.sidebar.text_input("Link to Promote (Fiverr/Affiliate)", value="https://www.fiverr.com/s/EgLla1d")
+# --- 🕹️ لوحة التحكم الجانبية ---
+st.sidebar.header("🚀 Sniper Config")
+niche = st.sidebar.text_input("Niche", value="AI Business Solutions")
+target_url = st.sidebar.text_input("Fiverr/Affiliate Link", value="https://www.fiverr.com/s/EgLla1d")
 st.sidebar.markdown("---")
-st.sidebar.write("💡 هاد الرابط غيتزرع فالمقالة أوتوماتيكياً.")
+st.sidebar.write("💡 هدفنا: 500 كلمة عالية القيمة مع روابط فعالة.")
 
-# --- 📑 الأقسام المنظمة ---
-tab1, tab2, tab3 = st.tabs(["🔎 SEO Sniper", "📝 Article Factory", "🎨 Image Architect"])
+# --- 📑 الأقسام ---
+tab1, tab2, tab3 = st.tabs(["🔎 SEO Sniper", "✍️ Sniper Content", "🎨 Image Architect"])
 
-# --- 1. قسم صيد الكلمات ---
+# 1. قسم صيد الكلمات
 with tab1:
-    st.subheader("🎯 Keyword Opportunity Hunter")
-    if st.button("Hunt Hot Keywords"):
-        with st.spinner("Searching Google Suggest..."):
-            url = f"http://suggestqueries.google.com/complete/search?output=firefox&q={niche}"
-            res = requests.get(url).json()[1]
-            st.session_state['beast_keys'] = res
-            if res:
-                st.success(f"لقيت {len(res)} كلمة مفتاحية ذهبية لـ {niche}!")
-            else:
-                st.warning("جرب كلمة أخرى.")
+    st.subheader("🎯 Target Keyword Discovery")
+    if st.button("Hunt Keywords"):
+        with st.spinner("Searching..."):
+            res = requests.get(f"http://suggestqueries.google.com/complete/search?output=firefox&q={niche}").json()[1]
+            st.session_state['keys'] = res
+            st.success(f"لقيت {len(res)} كلمة مفتاحية!")
+    
+    if 'keys' in st.session_state:
+        st.write(st.session_state['keys'])
 
-    if 'beast_keys' in st.session_state:
-        st.write("Keywords Found:", st.session_state['beast_keys'])
-
-# --- 2. قسم المقالة (التصحيح الشامل للمظهر والنسخ) ---
+# 2. صناعة المحتوى (Sniper 500 Words)
 with tab2:
-    st.subheader("✍️ Content Generation")
-    if 'beast_keys' in st.session_state and st.session_state['beast_keys']:
-        selected_key = st.selectbox("Select Target Keyword", st.session_state['beast_keys'])
+    st.subheader("📝 Sniper Article Factory")
+    if 'keys' in st.session_state:
+        selected_key = st.selectbox("Select Target", st.session_state['keys'])
         
-        if st.button("Generate Professional Article"):
-            with st.spinner("الوحش يكتب الآن..."):
+        if st.button("Generate High-Value Article"):
+            with st.spinner("الوحش يركز على الجودة..."):
+                # برومبت Sniper: يركز على القيمة، الاختصار، والروابط
                 prompt = f"""
-                Write a 1000-word professional SEO article about '{selected_key}'. 
-                Use a professional business tone.
-                Naturally include this link as the ultimate solution: {target_url}. 
-                Format: Use ## for main headings (H2), ### for subheadings (H3). 
-                Make the link clickable in Markdown like this: [Fiverr]({target_url}).
+                Write a HIGH-IMPACT SEO article about '{selected_key}'. 
+                MAX LENGTH: 500 words. 
+                STRICT RULE: You MUST include this link: {target_url} exactly 3 times.
+                - 1st time: In the introduction.
+                - 2nd time: Mid-article using anchor text like "this specialized AI service".
+                - 3rd time: In the final Call to Action.
+                
+                TONE: Authoritative, professional, and helpful. 
+                FORMAT: Use ## for H2, bullet points for key benefits. Use Markdown [Fiverr]({target_url}).
                 """
-                response = client.chat.completions.create(messages=[{"role": "user", "content": prompt}], model="llama-3.3-70b-versatile")
-                st.session_state['final_article'] = response.choices[0].message.content
+                response = client.chat.completions.create(
+                    messages=[{"role": "user", "content": prompt}],
+                    model="llama-3.3-70b-versatile",
+                    temperature=0.6 # تركيز عالي لمنع الحشو
+                )
+                st.session_state['article'] = response.choices[0].message.content
 
-        if 'final_article' in st.session_state:
-            # عرض المقالة بمظهر احترافي (Preview)
-            st.markdown('<div class="article-output">', unsafe_allow_html=True)
-            st.markdown(st.session_state['final_article'])
+        if 'article' in st.session_state:
+            # عرض المقالة (Preview)
+            st.markdown('<div class="article-container">', unsafe_allow_html=True)
+            st.markdown(st.session_state['article'])
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # --- أزرار النسخ الذكي (حل مشكلة الروابط و TypeError) ---
+            # خيارات النسخ الذكي
             st.write("---")
-            st.markdown("### 📋 Copy Options (Choose Your Platform):")
-            
+            st.markdown("### 📋 Copy & Post Options:")
             col1, col2 = st.columns(2)
             with col1:
-                st.info("Option 1: Copy for Reddit / Markdown")
-                # تحويل النص لـ string لضمان عدم وقوع TypeError
-                st_copy_to_clipboard(str(st.session_state['final_article']))
+                st.info("Copy for Reddit/Markdown")
+                st_copy_to_clipboard(text=str(st.session_state['article']))
             
             with col2:
-                st.success("Option 2: Copy for Blogger / WordPress (HTML)")
-                # تحويل Markdown لـ HTML بسيط لضمان بقاء الروابط والعناوين فـ Blogger
-                html_ready = str(st.session_state['final_article']).replace("## ", "<h2>").replace("### ", "<h3>").replace("\n", "<br>")
-                st_copy_to_clipboard(html_ready)
+                # تحويل HTML احترافي لـ Blogger
+                html_sniper = f"""
+                <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                {st.session_state['article'].replace('## ', '<h2>').replace('### ', '<h3>').replace('\n', '<br>')}
+                </div>
+                """
+                st.success("Copy for Blogger (HTML Mode)")
+                st_copy_to_clipboard(text=html_sniper)
 
-# --- 3. قسم برومبت الصورة ---
+# 3. قسم برومبت الصورة
 with tab3:
-    st.subheader("🎨 AI Image Prompt Creator")
-    if 'final_article' in st.session_state:
-        if st.button("Generate Pro Image Prompt"):
-            with st.spinner("Analyzing content for visuals..."):
-                img_prompt_req = f"Based on this article summary: {st.session_state['final_article'][:400]}. Generate a high-end image prompt for DALL-E 3 or Midjourney. Style: Professional, 4k, futuristic {niche}."
+    st.subheader("🎨 Thumbnail Prompt Architect")
+    if 'article' in st.session_state:
+        if st.button("Generate Image Prompt"):
+            with st.spinner("Analyzing content..."):
+                img_prompt_req = f"Create a professional DALL-E 3 prompt for an article about {selected_key}. Cinematic, clean, tech style."
                 res_img = client.chat.completions.create(messages=[{"role": "user", "content": img_prompt_req}], model="llama-3.3-70b-versatile")
-                st.session_state['img_prompt'] = res_img.choices[0].message.content
+                st.session_state['img_p'] = res_img.choices[0].message.content
         
-        if 'img_prompt' in st.session_state:
-            st.markdown("### 🖼️ Your Image Prompt:")
-            st.markdown(f'<div class="prompt-box">{st.session_state["img_prompt"]}</div>', unsafe_allow_html=True)
-            st.write("👇 Copy Prompt:")
-            st_copy_to_clipboard(str(st.session_state['img_prompt']))
+        if 'img_p' in st.session_state:
+            st.code(st.session_state['img_p'])
+            st_copy_to_clipboard(text=str(st.session_state['img_p']))
