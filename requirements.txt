@@ -1,7 +1,6 @@
-streamlit
-groq
-selenium
-webdriver-manager
-requests
+streamlit 
+groq 
+selenium 
+webdriver-manager 
+requests 
 beautifulsoup4
-python-dotenv
