@@ -1,11 +1,5 @@
 import streamlit as st
 from groq import Groq
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-import time
 import requests
 
 # --- إعدادات المحرك ---
@@ -14,92 +8,68 @@ try:
 except:
     st.error("⚠️ خاصك تزيد GROQ_API_KEY فـ Streamlit Secrets!")
 
-st.set_page_config(page_title="BEAST MAGNET V3", layout="wide")
+st.set_page_config(page_title="BEAST MAGNET V3.1", layout="wide")
 
+# تصميم "الوحش"
 st.markdown("""
     <style>
     .stApp { background-color: #050505; color: #00ffcc; }
-    .stButton>button { background: linear-gradient(45deg, #00ffcc, #0088ff); color: black; font-weight: bold; border-radius: 10px; border: none; }
-    h1, h2, h3 { color: #00ffcc !important; }
+    .stButton>button { background: linear-gradient(45deg, #ffd700, #b8860b); color: black; font-weight: bold; border-radius: 10px; }
+    .copy-box { background-color: #111; border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; color: #fff; }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🧲 Beast Universal Magnet V3.0 (No-API Edition)")
+st.title("🧲 Beast Magnet V3.1 (Manual & Auto Mode)")
 
-# --- ⚙️ Command Center (Sidebar) ---
-st.sidebar.header("🕹️ Global Config")
-niche = st.sidebar.text_input("Industry / Niche", value="Digital Marketing")
-target_url = st.sidebar.text_input("Your Target Link (Product/Gig/URL)")
-st.sidebar.markdown("---")
-st.sidebar.subheader("🔐 Account Vault (Selenium)")
-user_email = st.sidebar.text_input("Platform Email (Blogger/Medium)")
-user_pass = st.sidebar.text_input("Platform Password", type="password")
+# --- Sidebar ---
+st.sidebar.header("🎯 Target Config")
+niche = st.sidebar.text_input("Niche", value="Digital Marketing")
+target_url = st.sidebar.text_input("Link to Promote")
 
-tabs = st.tabs(["🎯 SEO Sniper", "✍️ AI Content Factory", "🚀 Ghost Blaster"])
+tabs = st.tabs(["🔎 SEO Sniper", "✍️ Content Factory & Copy"])
 
-# 1. صيد الكلمات المفتاحية (SEO Sniper)
+# 1. صيد الكلمات
 with tabs[0]:
-    st.header("🎯 Traffic Gap Finder")
     if st.button("Hunt Keywords"):
-        with st.spinner("Searching for gold nuggets..."):
-            # تقنية سكرابينج لـ Google Autocomplete (بلا API)
-            url = f"http://suggestqueries.google.com/complete/search?output=firefox&q={niche}"
-            suggestions = requests.get(url).json()[1]
-            st.session_state['beast_keys'] = suggestions
-            st.success(f"Found {len(suggestions)} High-Traffic keywords!")
-            st.write(suggestions)
+        url = f"http://suggestqueries.google.com/complete/search?output=firefox&q={niche}"
+        suggestions = requests.get(url).json()[1]
+        st.session_state['beast_keys'] = suggestions
+        st.success("Found High-Traffic keywords!")
+        st.write(suggestions)
 
-# 2. صناعة المحتوى (AI Content Factory)
+# 2. صناعة المحتوى مع زر الكوبي
 with tabs[1]:
     if 'beast_keys' in st.session_state:
         selected_key = st.selectbox("Select Keyword", st.session_state['beast_keys'])
-        tone = st.selectbox("Content Tone", ["Educational", "Aggressive Sales", "Viral Storytelling"])
         
-        if st.button("Generate Magnetic Article"):
-            with st.spinner("AI is crafting the masterpiece..."):
-                prompt = f"""
-                Write a 1000-word SEO article about '{selected_key}'. 
-                Tone: {tone}.
-                Target Link to promote: {target_url}.
-                Naturally integrate the link as the 'ultimate solution'. 
-                Use professional formatting (H1, H2, Bold).
-                """
+        if st.button("Generate Article"):
+            with st.spinner("AI is crafting..."):
+                prompt = f"Write a 1000-word SEO article about '{selected_key}'. Target Link: {target_url}. Use HTML tags like <h2>, <h3> and <b>."
                 res = client.chat.completions.create(messages=[{"role": "user", "content": prompt}], model="llama-3.3-70b-versatile")
                 st.session_state['final_article'] = res.choices[0].message.content
-                st.markdown(st.session_state['final_article'])
-
-# 3. وضع القصف (Ghost Blaster - Selenium)
-with tabs[2]:
-    st.header("🚀 Automated Ghost Posting")
-    platform = st.selectbox("Choose Platform", ["Blogger", "Medium", "Reddit (Coming Soon)"])
-    
-    if st.button("Launch Ghost Browser & Post"):
-        if not user_email or not user_pass:
-            st.error("⚠️ دخل الإيميل والباسورد فـ الجنب!")
-        else:
-            st.info(f"Starting Selenium for {platform}...")
-            options = webdriver.ChromeOptions()
-            # options.add_argument('--headless') # فاعلها باش المتصفح يخدم فـ الخلفية
-            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        
+        if 'final_article' in st.session_state:
+            st.markdown("### 📝 المقالة الواجدة:")
+            st.markdown(f'<div class="copy-box">{st.session_state["final_article"]}</div>', unsafe_allow_html=True)
             
-            try:
-                if platform == "Blogger":
-                    driver.get("https://www.blogger.com/go/signin")
-                    time.sleep(3)
-                    # 1. تسجيل الدخول
-                    email_field = driver.find_element(By.ID, "identifierId")
-                    email_field.send_keys(user_email + Keys.ENTER)
-                    time.sleep(5)
-                    # ملاحظة: جوجل قد تطلب التحقق بخطوتين يدوياً أول مرة
-                    st.warning("⚠️ إذا طلب جوجل التحقق، قم به في المتصفح المفتوح.")
-                    
-                    # 2. كتابة البوست
-                    # (هنا كنبرمجو الـ Selectors ديال Blogger لباقي العملية)
-                    st.success("✅ Logged in! Beast is navigating to 'New Post'...")
-                    
-                st.success(f"Mission Accomplished on {platform}!")
-            except Exception as e:
-                st.error(f"Error: {e}")
-            finally:
-                # driver.quit() # خليها مسدودة إلا بغيتي تشوف النتيجة
-                pass
+            # --- زر الكوبي السحري ---
+            content_to_copy = st.session_state['final_article'].replace("'", "\\'").replace("\n", "\\n")
+            copy_button_html = f"""
+            <button onclick="copyToClipboard()" style="margin-top:10px; background-color:#00ffcc; color:black; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+                📋 Copy Full Article
+            </button>
+
+            <script>
+            function copyToClipboard() {{
+                const text = `{content_to_copy}`;
+                navigator.clipboard.writeText(text).then(function() {{
+                    alert('✅ المقالة تكوبات! دبا حطها (Paste) فين ما بغيتي.');
+                }}, function(err) {{
+                    console.error('Could not copy text: ', err);
+                }});
+            }}
+            </script>
+            """
+            st.components.v1.html(copy_button_html, height=70)
+            
+            st.info("💡 نصيحة: فاش تكوبي المقالة، حطها فـ Blogger فـ وضع 'HTML View' باش يبقاو العناوين (H2, H3) مقادين.")
